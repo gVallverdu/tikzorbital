@@ -1,0 +1,389 @@
+% -------------------
+% Package tikzorbital
+% -------------------
+%
+% This package provides several commands in order to draw atomic orbitals and 
+% molecular diagrams.
+%
+% Germain Vallverdu <germain.vallverdu@univ-pau.fr>
+% 05 decembre 2012
+% http://gvallver.perso.univ-pau.fr/
+%
+% Licence : LaTeX Project Public Licence
+% http://www.latex-project.org/lppl.txt
+%
+% Feel free to contact me if you have any ideas, suggestions or bugs report !
+%
+% Change
+% ------
+% 27/02/2013 : add -px, -py, -pz orbital type 
+%
+% -----------------------------------------------------------------------------
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tikzorbital}[2012/12/05 draw atomic orbitals and molecular diagrams with tikz]
+% -----------------------------------------------------------------------------
+
+\RequirePackage{tikz}
+\usetikzlibrary{shapes}
+\RequirePackage{ifthen}
+
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{main}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+
+% -----------------------------------------------------------------------------
+% keys in order to submit tikz command to macro
+% -----------------------------------------------------------------------------
+\pgfkeys{/tikz/.cd,
+    execute style/.style = {#1},
+    execute macro/.style = {execute style/.expand once=#1}
+}
+
+% -----------------------------------------------------------------------------
+% commande \drawLevel[key = value]{name}
+% -----------------------------------------------------------------------------
+% draw a level with a given name in order to draw molecular diagrams
+%
+%  argument
+%     name       : base name of level anchor.
+%
+%  options
+%     elec       : Number of electrons : up, down, updown or pair
+%     pos        : left position of the level
+%     width      : level widht
+%     style      : level style (a tikzstyle)
+%     spinstyle  : style of arrows which represents electrons (a tikzstyle)
+%     spinlength : length of spin arrows 
+% -----------------------------------------------------------------------------
+
+\pgfkeys{/tikzorbital/drawLevel/.cd,
+% number of electron in the level : up, down, updown or pair
+    elec/.store in = \drawLevel@elec,
+    elec/.default = no,
+% position of the left anchor of the level
+    pos/.store in = \drawLevel@pos,
+    pos/.default = {(0,0)},
+% width of levels
+    width/.store in = \drawLevel@width,
+    width/.default = 2,
+% style of levels
+    style/.store in = \drawLevel@style,
+    style/.default = {line width = 2pt, color = black!80, line cap = round},
+% style of arrows
+    spinstyle/.store in = \drawLevel@spinstyle,
+    spinstyle/.default = {very thick, color = red!80, -stealth},
+% length of spin arrows
+    spinlength/.store in = \drawLevel@spinlength,
+    spinlength/.default = 1,
+% execute options
+    elec, pos, width, style, spinstyle, spinlength
+}
+
+% the drawLevel command
+\newcommand{\drawLevel}[2][]{%
+    \begingroup
+    \pgfkeys{/tikzorbital/drawLevel/.cd, #1}
+    \def\drawLevel@name{#2}
+
+    \draw[execute macro = \drawLevel@style]
+        \drawLevel@pos 
+        node (left \drawLevel@name) {} 
+        -- ++ (\drawLevel@width, 0) 
+        node (right \drawLevel@name) {}
+        node[pos=0.5] (middle \drawLevel@name) {}
+        node[pos=0.3] (pos1) {}
+        node[pos=0.7] (pos2) {};
+
+    \ifthenelse{\equal{\drawLevel@elec}{updown} \or \equal{\drawLevel@elec}{pair}}{
+        \draw[execute macro = \drawLevel@spinstyle] 
+            (pos1.center) ++ (0,-\drawLevel@spinlength/2) -- 
+                          ++ (0,\drawLevel@spinlength);
+        \draw[execute macro = \drawLevel@spinstyle] 
+            (pos2.center) ++ (0, \drawLevel@spinlength/2) -- 
+                          ++ (0,-\drawLevel@spinlength);
+    }{
+        \ifthenelse{\equal{\drawLevel@elec}{up}}{
+            \draw[execute macro = \drawLevel@spinstyle] 
+                (middle #2.center) ++ (0,-\drawLevel@spinlength/2) --
+                                   ++ (0,\drawLevel@spinlength);
+        }{
+            \ifthenelse{\equal{\drawLevel@elec}{down}}{
+                \draw[execute macro = \drawLevel@spinstyle]
+                    (middle #2.center) ++(0,\drawLevel@spinlength/2) -- 
+                                       ++ (0,-\drawLevel@spinlength);
+            }{
+            }
+        }
+    }
+    \endgroup
+}
+
+% -----------------------------------------------------------------------------
+% some customization of orbital
+% -----------------------------------------------------------------------------
+
+% inner color for orbital filling
+\colorlet{innerColor}{black!10}
+
+% color for orbital drawing
+\colorlet{drawColor}{black!80}
+
+% more style for lobe orbital drawing
+\newcommand{\setOrbitalDrawing}[1]{\def\orbitalDrawing{#1}}
+\setOrbitalDrawing{thick}
+
+% -----------------------------------------------------------------------------
+% inner \@alobe command
+% -----------------------------------------------------------------------------
+% Draw one lobe of a p or d atomic orbital, at a given position with a given scale,
+% color, rotation and opacity. Draw zero, one or two balls which represent electrons.
+%
+% arguments
+%     #1 : position
+%     #2 : rotation
+%     #3 : scale
+%     #4 : color
+%     #5 : number of electron
+%     #6 : opacity
+% -----------------------------------------------------------------------------
+\newcommand{\@alobe}[6]{
+    \begin{scope}[rotate around = {#2:#1}]
+        % draw orbital lobe
+        \begin{pgfonlayer}{background}
+            \draw[draw = drawColor, outer color = #4, inner color = innerColor, 
+                  opacity = #6, execute macro = \orbitalDrawing] 
+                #1 .. controls ++ (#3 * 1, #3 * 1) and ++ (#3 * 1, - #3 * 1) .. #1;
+        \end{pgfonlayer}
+
+        %Coordinates of the electrons
+        \path #1 ++ (0.50 * #3, 0) node (e1) {};
+        \path #1 ++ (0.25 * #3, 0) node (e2) {};
+    \end{scope}
+
+    % Draw the electrons
+    \ifnum#5>0
+        \foreach \n in {1,...,#5} {
+            \shade[ball color = #4] (e\n) circle (1mm);
+        }
+    \fi
+}
+
+% -----------------------------------------------------------------------------
+% commande \orbital[key = value]{type}
+% -----------------------------------------------------------------------------
+% draw an atomic orbital of a given type.
+%
+%  argument 
+%     type    : lobe, s, px, py, pz, dxz, dyz, dxy, dz2, dx2y2
+%
+%  options
+%     pos     : left position of the level
+%     pcolor  : color of the positive lobe
+%     ncolor  : color of the negative lobe
+%     scale   : scaling factor
+%     opacity : opacity of the orbital
+%     rotate  : rotate of the AO (lobe type only)
+%     nelec   : number of electron (lobe type only)
+% -----------------------------------------------------------------------------
+
+% define options
+\pgfkeys{/tikzorbital/orbital/.cd,
+% position of the orbital
+    pos/.store in = \orbital@pos,
+    pos/.default = {(0,0)},
+% color of the positive lobe
+    pcolor/.store in = \orbital@pcolor,
+    pcolor/.default = blue,
+% color of the negative lobe
+    ncolor/.store in = \orbital@ncolor,
+    ncolor/.default = black!30,
+% color for s type
+    color/.store in = \orbital@color,
+    color/.default = empty,
+% scale factor
+    scale/.store in = \orbital@scale,
+    scale/.default = 1,
+% opacity of the orbital
+    opacity/.store in = \orbital@opacity,
+    opacity/.default = 1.,
+% lobe type options
+% rotation of the orbital
+    rotate/.store in = \orbital@rotate,
+    rotate/.default = 0,
+% number of electrons
+    nelec/.store in = \orbital@nelec,
+    nelec/.default = 0,
+% execute options
+    pos, pcolor, ncolor, scale, opacity, rotate, nelec, color
+}
+
+% orbital command
+\newcommand{\orbital}[2][]{
+    \begingroup
+    \pgfkeys{/tikzorbital/orbital/.cd, #1}
+
+    % orbital type
+    \def\orbital@type{#2}
+
+    % general style
+    \tikzstyle{base} = [draw = drawColor, thick, inner color = innerColor, 
+                        circle, opacity = \orbital@opacity, 
+                        execute macro = \orbitalDrawing]
+
+    % check if color was setted
+    \ifthenelse{\equal{\orbital@color}{empty}}{
+        \pgfkeys{/tikzorbital/orbital/.cd, color = \orbital@pcolor}
+    }{}
+
+    % draw the whished orbital
+    \ifthenelse{\equal{\orbital@type}{lobe}}{
+        \@alobe{\orbital@pos}{\orbital@rotate}{\orbital@scale}{\orbital@color}{\orbital@nelec}{\orbital@opacity}
+    }{
+    \ifthenelse{\equal{\orbital@type}{py}}{
+        \@alobe{\orbital@pos}{0}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}
+        \@alobe{\orbital@pos}{180}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+    }{
+    \ifthenelse{\equal{\orbital@type}{-py}}{
+        \@alobe{\orbital@pos}{180}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}
+        \@alobe{\orbital@pos}{0}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+    }{
+    \ifthenelse{\equal{\orbital@type}{pz}}{
+        \@alobe{\orbital@pos}{90}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity} 
+        \@alobe{\orbital@pos}{270}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+    }{
+    \ifthenelse{\equal{\orbital@type}{-pz}}{
+        \@alobe{\orbital@pos}{270}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity} 
+        \@alobe{\orbital@pos}{90}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+    }{
+    \ifthenelse{\equal{\orbital@type}{px}}{
+        \node[base, outer color = \orbital@ncolor, scale = \orbital@scale * 1.8, 
+              xshift = 2pt, yshift = 2pt] at \orbital@pos {};
+        \node[base, outer color = \orbital@pcolor, scale = \orbital@scale * 1.8] 
+            at \orbital@pos {};
+    }{
+    \ifthenelse{\equal{\orbital@type}{-px}}{
+        \node[base, outer color = \orbital@pcolor, scale = \orbital@scale * 1.8, 
+              xshift = 2pt, yshift = 2pt] at \orbital@pos {};
+        \node[base, outer color = \orbital@ncolor, scale = \orbital@scale * 1.8] 
+            at \orbital@pos {};
+    }{
+    \ifthenelse{\equal{\orbital@type}{dyz}}{
+        \@alobe{\orbital@pos}{45}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}   
+        \@alobe{\orbital@pos}{135}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity} 
+        \@alobe{\orbital@pos}{225}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity} 
+        \@alobe{\orbital@pos}{315}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity} 
+    }{
+    \ifthenelse{\equal{\orbital@type}{dxz}}{
+        \@alobe{\orbital@pos}{80}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+        \@alobe{\orbital@pos}{280}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}
+        \@alobe{\orbital@pos}{100}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}
+        \@alobe{\orbital@pos}{260}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+    }{
+    \ifthenelse{\equal{\orbital@type}{dxy}}{
+        \@alobe{\orbital@pos}{10}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+        \@alobe{\orbital@pos}{170}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}
+        \@alobe{\orbital@pos}{350}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}
+        \@alobe{\orbital@pos}{190}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+    }{
+    \ifthenelse{\equal{\orbital@type}{dx2y2}}{
+        \begin{pgfonlayer}{background}
+        \node[base, outer color = \orbital@pcolor, scale = \orbital@scale * 1.8, 
+              xshift = 2pt, yshift = 2pt] at \orbital@pos {};
+        \end{pgfonlayer}
+        \@alobe{\orbital@pos}{0}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+        \@alobe{\orbital@pos}{180}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+        \node[base, outer color = \orbital@pcolor, scale = \orbital@scale * 1.8] 
+            at \orbital@pos {};
+    }{
+    \ifthenelse{\equal{\orbital@type}{dz2}}{
+        \@alobe{\orbital@pos}{270}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}
+        \begin{pgfonlayer}{background}
+        \node[ellipse, minimum width = \orbital@scale * .8cm, 
+              minimum height = \orbital@scale * .3cm, draw = drawColor, 
+              inner color = innerColor, outer color = \orbital@ncolor, 
+              execute macro = \orbitalDrawing] 
+            at \orbital@pos {};
+        \end{pgfonlayer}
+        \@alobe{\orbital@pos}{90}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}
+    }{
+    \ifthenelse{\equal{\orbital@type}{s}}{
+        \node[base, outer color = \orbital@color, scale = \orbital@scale * 1.8] 
+            at \orbital@pos {};
+    }{
+        \node[red] at \orbital@pos {orbital type unknown};
+    }}}}}}}}}}}}}
+    \endgroup
+}
+
+%
+% other possibility for dxy and dxz atomic orbital
+% ------------------------------------------------
+%
+% dxz
+%    \begin{scope}[xshift = 2.2pt, yshift = 2pt]
+%        \@alobe{\orbital@pos}{90}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+%        \@alobe{\orbital@pos}{270}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}
+%    \end{scope}
+%    \@alobe{\orbital@pos}{90}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}
+%    \@alobe{\orbital@pos}{270}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+%
+% dxy
+%    \begin{scope}[xshift = 2.2pt, yshift = 2pt]
+%        \@alobe{\orbital@pos}{10}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+%        \@alobe{\orbital@pos}{170}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}
+%    \end{scope}
+%    \@alobe{\orbital@pos}{350}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}
+%    \@alobe{\orbital@pos}{190}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity}
+%
+% -------------------------------------------------
+
+% -----------------------------------------------------------------------------
+% commande \atom[options]{lobes}
+% -----------------------------------------------------------------------------
+% quickly draw an atom with several orbital lobes around it
+%
+%  argument 
+%     lobes   : A comma separated list lobe definition with 
+%                  color/rotation-angle/anchor/number of electrons
+%
+%  options
+%     pos     : position of the atom
+%     name    : name of the atom, also used to label the node
+%     color   : color of the atom
+%     opacity : opacity of the orbital
+% -----------------------------------------------------------------------------
+
+% define options
+\pgfkeys{/tikzorbital/atom/.cd,
+% position of the atom
+    pos/.store in = \atom@pos,
+    pos/.default = {(0,0)},
+% atom name
+    name/.store in = \atom@name,
+    name/.default = X,
+% color of the atom
+    color/.store in = \atom@color,
+    color/.default = green,
+% opacity of the orbitals
+    opacity/.store in = \atom@opacity,
+    opacity/.default = .8,
+% execute options
+    pos, name, color, opacity
+}
+
+% atom definition
+\newcommand{\atom}[2][]{
+    \begingroup
+    \pgfkeys{/tikzorbital/atom/.cd, #1}
+    \colorlet{atomColor}{\atom@color}
+    \node[shape = circle, thick, inner sep = 0pt, minimum size = 1.5em,
+          draw = atomColor!40, color = atomColor!70!gray, fill = atomColor!20]
+          at \atom@pos (\atom@name) {\atom@name};
+    \foreach \acolor/\rot/\anchor/\Ne in {#2} {
+        \@alobe{(\atom@name.\anchor)}{\rot}{1.5}{\acolor}{\Ne}{\atom@opacity}
+    }
+    \endgroup
+}
+
+%% end of file %%
