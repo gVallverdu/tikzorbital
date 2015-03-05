@@ -22,7 +22,7 @@ All macros have to be used inside tikzpicture environment :
 
     * ``\drawLevel`` : draw a level with zero, one or two electrons drawn as up and arrows. This command is used for molecular orbital diagrams.
     * ``\orbital``   : draw atomic orbital of type s, p or d.
-    * ``\atom``      : quickly place an atom with several lobes around it.
+    * ``\satom``      : quickly place an atom with several lobes around it.
 
 bugs and suggestion
 -------------------
