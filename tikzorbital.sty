@@ -17,6 +17,7 @@
 % Change
 % ------
 % 27/02/2013 : add -px, -py, -pz orbital type 
+% 05/03/2015 : add satom macro, with scaling options for each lobe
 %
 % -----------------------------------------------------------------------------
 \NeedsTeXFormat{LaTeX2e}
@@ -153,7 +154,7 @@
         \begin{pgfonlayer}{background}
             \draw[draw = drawColor, outer color = #4, inner color = innerColor, 
                   opacity = #6, execute macro = \orbitalDrawing] 
-                #1 .. controls ++ (#3 * 1, #3 * 1) and ++ (#3 * 1, - #3 * 1) .. #1;
+                #1 .. controls ++ (#3, #3) and ++ (#3, - #3) .. #1;
         \end{pgfonlayer}
 
         %Coordinates of the electrons
@@ -341,7 +342,8 @@
 % -----------------------------------------------------------------------------
 % commande \atom[options]{lobes}
 % -----------------------------------------------------------------------------
-% quickly draw an atom with several orbital lobes around it
+% quickly draw an atom with several orbital lobes around it. 
+% DEPRECATED, use satom insteed.
 %
 %  argument 
 %     lobes   : A comma separated list lobe definition with 
@@ -352,6 +354,7 @@
 %     name    : name of the atom, also used to label the node
 %     color   : color of the atom
 %     opacity : opacity of the orbital
+%     scale   : scaling factor
 % -----------------------------------------------------------------------------
 
 % define options
@@ -368,8 +371,11 @@
 % opacity of the orbitals
     opacity/.store in = \atom@opacity,
     opacity/.default = .8,
+% scaling factor
+    scale/.store in = \atom@scale,
+    scale/.default = 1.,
 % execute options
-    pos, name, color, opacity
+    pos, name, color, opacity, scale
 }
 
 % atom definition
@@ -378,10 +384,65 @@
     \pgfkeys{/tikzorbital/atom/.cd, #1}
     \colorlet{atomColor}{\atom@color}
     \node[shape = circle, thick, inner sep = 0pt, minimum size = 1.5em,
-          draw = atomColor!40, color = atomColor!70!gray, fill = atomColor!20]
+          draw = atomColor!40, color = atomColor!70!gray, fill = atomColor!20,
+          scale = \atom@scale]
           at \atom@pos (\atom@name) {\atom@name};
+    \def\s{1.}
     \foreach \acolor/\rot/\anchor/\Ne in {#2} {
-        \@alobe{(\atom@name.\anchor)}{\rot}{1.5}{\acolor}{\Ne}{\atom@opacity}
+        \@alobe{(\atom@name.\anchor)}{\rot}{1.5*\atom@scale}{\acolor}{\Ne}{\atom@opacity}
+    }
+    \endgroup
+}
+
+% -----------------------------------------------------------------------------
+% commande \satom[options]{lobes}
+% -----------------------------------------------------------------------------
+% quickly draw an atom with several orbital lobes around it
+%
+%  argument 
+%     lobes   : A comma separated list lobe definition with 
+%                  color/rotation-angle/anchor/number of electrons/scale
+%
+%  options
+%     pos     : position of the atom
+%     name    : name of the atom, also used to label the node
+%     color   : color of the atom
+%     opacity : opacity of the orbital
+%     scale   : global scaling factor
+% -----------------------------------------------------------------------------
+
+% define options
+\pgfkeys{/tikzorbital/satom/.cd,
+% position of the atom
+    pos/.store in = \satom@pos,
+    pos/.default = {(0,0)},
+% atom name
+    name/.store in = \satom@name,
+    name/.default = X,
+% color of the atom
+    color/.store in = \satom@color,
+    color/.default = green,
+% opacity of the orbitals
+    opacity/.store in = \satom@opacity,
+    opacity/.default = .8,
+% scaling factor
+    scale/.store in = \satom@scale,
+    scale/.default = 1.,
+% execute options
+    pos, name, color, opacity, scale
+}
+
+% atom definition
+\newcommand{\satom}[2][]{
+    \begingroup
+    \pgfkeys{/tikzorbital/satom/.cd, #1}
+    \colorlet{atomColor}{\satom@color}
+    \node[shape = circle, thick, inner sep = 0pt, minimum size = 1.5em,
+          draw = atomColor!40, color = atomColor!70!gray, fill = atomColor!20,
+          scale = \satom@scale]
+          at \satom@pos (\satom@name) {\satom@name};
+    \foreach \acolor/\rot/\anchor/\Ne/\s in {#2} {
+        \@alobe{(\satom@name.\anchor)}{\rot}{1.5*\s*\atom@scale}{\acolor}{\Ne}{\satom@opacity}
     }
     \endgroup
 }

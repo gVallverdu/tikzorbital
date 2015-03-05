@@ -401,15 +401,17 @@ Example \ref{expl:all_OA} shows all atomic orbital types available. In order to 
 \clearpage
 \section{Atom and hybrid orbitals}
 
-The package \package provides the command \cmd{atom} in order to quickly draw an atom with several orbital lobes around it. The general syntax of the command is :
+The package \package provides the command \cmd{satom} in order to quickly draw an atom with several orbital lobes around it. The general syntax of the command is :
 
-\cmd{atom}\opt{options}\{\marg{lobes}\}
+\cmd{satom}\opt{options}\{\marg{lobes}\}
 
 The \marg{lobes} argument is a comma separated list of lobe definition with the syntax 
 
-\texttt{color/rotation-angle/anchor/number of electrons}
+\texttt{color/rotation-angle/anchor/number of electrons/scale}
 
-For each element of the list, the command \cmd{atom} draw a lobe at the given anchor, with the given color , rotation and number of electrons.
+For each element of the list, the command \cmd{satom} draw a lobe at the given
+anchor, with the given color, rotation, number of electrons and applies the
+scaling factor.
 
 The following options are available in order to customize the drawing :
 
@@ -425,58 +427,65 @@ The following options are available in order to customize the drawing :
     
     \item \opt{opacity} : opacity of the lobe drawn around the atom.\\
     \texttt{default = 0.8}
+    
+    \item \opt{scale} : A global scaling factor of the whole atom and lobes.\\
+    \texttt{default = 1.}
 \end{description}
 
-Example \ref{exple:atom} show several applications of the command \cmd{atom}.
+For backward compatibility the \cmd{atom} command is still available. It works
+in the same way but without the possibility of applying a scaling factor
+individually on each lobe.
+
+Example \ref{exple:atom} show several applications of the command \cmd{satom}.
 
 \begin{example}[htbp]
 \begin{minipage}{.78\textwidth}
 \begin{lstlisting}
 \begin{tikzpicture}
-    \atom[color = orange, name = S]{orange/0/east/2}
+    \satom[color=orange, name=S]{orange/0/east/2/1.}
 \end{tikzpicture}
 \end{lstlisting}
 
 \begin{lstlisting}
 \begin{tikzpicture}
-    \atom[name = Cl, color = blue]{
+    \atom[name=Cl, color=blue, scale=1.2]{
         blue/90/north/2,
         blue/0/east/1,
         blue/270/south/2,
         blue/180/west/2} 
-    \atom[name = H, color = gray, pos = {(1.8,0)}]{gray/180/west/1} 
+    \atom[name=H, color=gray, pos={(1.8,0)}, scale=.8]{gray/180/west/1} 
 \end{tikzpicture} 
 \end{lstlisting}
 
 \begin{lstlisting}
 \begin{tikzpicture} 
-    \atom[name = B, color = green!50!black]{
-        red/90/north/2,
-        blue/0/east/1,
-        orange/270/south/0,
-        green/180/west/1} 
+    \satom[name=B, color=green!50!black]{
+        red/90/north/2/.8,
+        blue/0/east/1/.9,
+        orange/270/south/0/1,
+        green/180/west/1/1.2} 
 \end{tikzpicture} 
 \end{lstlisting}
 \end{minipage}
 \begin{minipage}{.21\textwidth}
 \begin{tikzpicture}
-    \atom[color = orange, name = S]{orange/0/east/2}
+    \satom[color=orange, name=S]{orange/0/east/2/1.}
     
-    \atom[name = Cl, color = blue, pos = {(0,-3)}]{
+    \atom[name=Cl, color=blue, pos={(0,-3)}, scale=1.2]{
         blue/90/north/2,
         blue/0/east/1,
         blue/270/south/2,
         blue/180/west/2} 
-    \atom[name = H, color = gray, pos = {(1.8,-3)}]{gray/180/west/1} 
+    \atom[name=H, color=gray, pos={(1.8,-3)}, scale=.8]{gray/180/west/1} 
     
-    \atom[name = B, color = green!50!black, pos = {(0,-7)}]{
-        red/90/north/2,
-        blue/0/east/1,
-        orange/270/south/0,
-        green/180/west/1}
+    \satom[name=B, color=green!50!black, pos={(0,-7)}]{
+        red/90/north/2/.8,
+        blue/0/east/1/0.9,
+        orange/270/south/0/1,
+        green/180/west/1/1.2}
 \end{tikzpicture}
 \end{minipage}
-\caption{Utilization example of the \cmd{atom} command.}
+\caption{Utilization example of the \cmd{satom} command.}
 \label{exple:atom}
 \end{example}
 
@@ -544,6 +553,6 @@ no default are given. For example, the $d_{yz}$ atomic orbital is defined as fol
 
 \section{Source code}
 
-\lstinputlisting{../../../tex/latex/tikzorbital/tikzorbital.sty}
+\lstinputlisting{./tikzorbital.sty}
 
 \end{document}
