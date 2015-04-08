@@ -103,11 +103,12 @@ pdfproducer={PDFLaTeX},%
 \maketitle
 
 \begin{abstract}
-    This package provides several \LaTeX{} macros in order to draw easily molecular diagrams and atomic orbital of type $s$, $p$ and $d$ inside tikzpicture environment. This documentation gives the syntax of the commands and complete examples of their utilization. The source code is give at the end.
+    This package provides several \LaTeX{} macros in order to draw easily molecular orbital diagrams and atomic orbital of type $s$, $p$ and $d$ inside tikzpicture environment. This documentation gives the syntax of the commands and complete examples of their utilization. The source code is give at the end.
 \end{abstract}
 
-{\singlespacing
-\tableofcontents
+{
+    \singlespacing
+    \tableofcontents
 }
 
 \section{Requirements and licence}
@@ -141,12 +142,12 @@ Package \package do not have any options. After you have copied it in a director
 \usepackage{tikzorbital}
 \end{lstlisting}
 
-All macros provided by \package must be uses inside a tikzpicture environment. The \opt{pos} option of the macro is a position which can be given in the tikz syntax.
+All macros provided by \package must be uses inside a \texttt{tikzpicture} environment. The \opt{pos} option of all the macros is a position which can be given in the tikz syntax and between braces.
 
 Options of macros provided by \package must be given in a \texttt{key = value} syntax. For example :
 %
 \begin{lstlisting}
-\command[option 1 = <value1>, option2 = <value2> ...]{argument}
+\command[option 1=<value1>, option2=<value2> ...]{argument}
 \end{lstlisting}
 
 \section{Molecular orbital diagrams}
@@ -185,7 +186,10 @@ The following \opt{options} are available :
     \texttt{default = 1}
 \end{description}
 
-Note that if the value of an option contains comma or parenthesis, you should enclose its in curly brace.
+Note that if the value of an option contains comma or parenthesis, you should enclose its in curly brace. The following macro allows you to change the length of levels :
+\begin{description}
+    \item \cmd{levelWidth}\{\marg{length}\} : this macro set the length of level.
+\end{description}
 
 Example \ref{expl:molecular_diagram} shows how to use \cmd{drawLevel} for molecule \ce{HHe}.
 
@@ -193,11 +197,11 @@ Example \ref{expl:molecular_diagram} shows how to use \cmd{drawLevel} for molecu
 \begin{minipage}{0.6\textwidth}
 \begin{lstlisting}
 \begin{tikzpicture}
-   \drawLevel[elec = up, pos = {(0,0)}, width = 2]{1sH}
-   \drawLevel[elec = updown, pos = {(6,-2)}, width = 2]{1sHe}
+   \drawLevel[elec=up, pos={(0,0)}]{1sH}
+   \drawLevel[elec=updown, pos={(6,-2)}]{1sHe}
 
-   \drawLevel[elec = pair, pos = {(3,-3)}, width = 2]{sigma}
-   \drawLevel[elec = up, pos = {(3,3)}, width = 2]{sigmastar}
+   \drawLevel[elec=pair, pos={(3,-3)}]{sigma}
+   \drawLevel[elec=up, pos={(3,3)}]{sigmastar}
 
    \draw[dashed] (right 1sH) -- (left sigma)
          (right 1sH) -- (left sigmastar)
@@ -215,11 +219,11 @@ Example \ref{expl:molecular_diagram} shows how to use \cmd{drawLevel} for molecu
 \begin{minipage}{0.39\textwidth}
 \centering
 \begin{tikzpicture}[scale=0.7]
-     \drawLevel[elec = up, pos = {(0,0)}, width = 2]{1sH}
-     \drawLevel[elec = updown, pos = {(6,-2)}, width = 2]{1sHe}
+     \drawLevel[elec=up, pos={(0,0)}]{1sH}
+     \drawLevel[elec=updown, pos ={(6,-2)}]{1sHe}
 
-     \drawLevel[elec = pair, pos = {(3,-3)}, width = 2]{sigma}
-     \drawLevel[elec = up, pos = {(3,3)}, width = 2]{sigmastar}
+     \drawLevel[elec=pair, pos={(3,-3)}]{sigma}
+     \drawLevel[elec=up, pos={(3,3)}]{sigmastar}
 
      \draw[dashed] (right 1sH) -- (left sigma)
            (right 1sH) -- (left sigmastar)
@@ -232,7 +236,7 @@ Example \ref{expl:molecular_diagram} shows how to use \cmd{drawLevel} for molecu
      \node[left] at (left sigmastar) {$\sigma^*$};
 \end{tikzpicture}
 \end{minipage}
-\caption{Example of the molecular diagram of the molecule \ce{HHe+} drew with the command \cmd{drawLevel}.}
+\caption{Example of the molecular diagram of the molecule \ce{HHe+} drew with the \cmd{drawLevel} command.}
 \label{expl:molecular_diagram}
 \end{example}
 
@@ -242,13 +246,13 @@ The package \package, provides the command \cmd{orbital} in order to draw atomic
 
 \cmd{orbital}\opt{options}\{\marg{type}\}
 
-where \marg{type} is the type of the atomic orbital : \texttt{lobe, s, px, py, pz, dxy, dxz, dyz, dx2y2} or \texttt{dz2}. See example \ref{expl:all_OA} to see all atomic orbital types. The \texttt{lobe} type simply draw one lobe of a $p$ or $d$ atomic orbital and may be used, for example, to draw hybrid orbital. With the \texttt{lobe} type you can also represent electrons as small spheres inside the orbital.
+where \marg{type} is the type of the atomic orbital : \texttt{lobe, $\pm$s, $\pm$px, $\pm$py, $\pm$pz, dxy, dxz, dyz, dx2y2} or \texttt{dz2}. See example \ref{expl:all_OA} to see all atomic orbital types. The \texttt{lobe} type simply draw one lobe of a $p$ or $d$ atomic orbital and may be used, for example, to draw hybrid orbital. With the \texttt{lobe} type you can also represent electrons as small spheres inside the orbital.
 
 \begin{minipage}{.75\textwidth}
 \begin{lstlisting}
 \begin{tikzpicture}
     \node (s) {S};
-    \orbital[nelec = 2, scale = 1.5, pos = (s.east)]{lobe}
+    \orbital[nelec=2, scale=1.5, pos=(s.east)]{lobe}
 \end{tikzpicture}
 \end{lstlisting}
 \end{minipage}
@@ -256,11 +260,11 @@ where \marg{type} is the type of the atomic orbital : \texttt{lobe, s, px, py, p
 \centering
 \begin{tikzpicture}
     \node (s) {S};
-    \orbital[nelec = 2, scale = 1.5, pos = (s.east)]{lobe}
+    \orbital[nelec=2, scale=1.5, pos=(s.east)]{lobe}
 \end{tikzpicture}
 \end{minipage}
 
-\subsection*{General options}
+\subsubsection*{General options of the \texttt{orbital} command}
 
 The following options, allow to change the position, the aspect and the size the atomic orbital. They are available for all type of atomic orbital.  :
 %
@@ -290,6 +294,12 @@ The color of atomic orbitals can be selected with options : \opt{pcolor}, \opt{n
     \texttt{default = black!30}
 \end{description}
 
+The default values of \opt{pcolor} and \opt{ncolor} options can be set using the following macros :
+\begin{description}
+    \item \cmd{setpcolor}\{\marg{color}\} : this macro defines the color or positive lobes of orbitals.
+    \item \cmd{setncolor}\{\marg{color}\} : this macro defines the color or negative lobes of orbitals.
+\end{description}
+
 \subsubsection*{\texttt{lobe}-type specific options}
 
 The following options will have an effect only for the \texttt{lobe} type :
@@ -302,12 +312,15 @@ The following options will have an effect only for the \texttt{lobe} type :
     \texttt{default = 0}
 \end{description}
 
-\subsubsection*{examples}
+\subsubsection*{Shapes of the atomic orbitals}
 
-Example \ref{expl:all_OA} shows all atomic orbital types available. In order to decide the type of the atomic orbital you need, look at the axes definition below :
-
+\begin{minipage}[c]{.7\textwidth}
+Example \ref{expl:all_OA} shows all atomic orbital types available. In order to decide the type of the atomic orbital you need, look at the axes definition below.
+\end{minipage}
+\hfill
+\begin{minipage}[c]{.29\textwidth}
 \begin{center}
-\begin{tikzpicture}[scale = 2]
+\begin{tikzpicture}[scale = 1.5]
     \tikzstyle{axe} = [-stealth, thick, color = black!80]
     \draw[very thick, draw = black!80, fill = white, rounded corners = 1pt, drop shadow] (-.3,-.3) rectangle (1.2,1.821) node (corner) {};
     \node[below left] at (corner) {paper sheet};
@@ -316,19 +329,21 @@ Example \ref{expl:all_OA} shows all atomic orbital types available. In order to 
     \node[circle, fill = black!80, scale = .5] at (0,0) {};
     \node[circle, draw, color = black!80, thick, scale = 1] {};
     \node[below left] {$\vec{x}$};
-    \node[left, xshift = -2mm] at (current bounding box.west) {Cartesian axes definition :};
+    \node[above] at (current bounding box.north) {Cartesian axes definition :};
 \end{tikzpicture}
 \end{center}
+\end{minipage}
 
-\begin{example}[htbp]
+\begin{example}[htb]
 \begin{minipage}{.49\textwidth}
 \begin{lstlisting}
 \begin{tikzpicture}
-    \orbital[pos = {(2,5.5)}]{lobe}
-    \node[above] at (2.5,6) {simple lobe};
-
     \orbital[pos = {(0,5.5)}]{s}
-    \node[above] at (0,6) {s};
+    \node[above] at (0,6) {s};    
+    \orbital[pos = {(2,5.5)}]{-s}
+    \node[above] at (2,6) {-s};
+    \orbital[pos = {(4,5.5)}]{lobe}
+    \node[above] at (4.5,6) {simple lobe};
 
     \orbital[pos = {(0,3)}]{px}
     \node[above] at (0,4) {p$_x$};
@@ -361,11 +376,12 @@ Example \ref{expl:all_OA} shows all atomic orbital types available. In order to 
 \begin{minipage}{.49\textwidth}
 \centering
 \begin{tikzpicture}
-    \orbital[pos = {(2,5.5)}]{lobe}
-    \node[above] at (2.5,6) {simple lobe};
-
     \orbital[pos = {(0,5.5)}]{s}
     \node[above] at (0,6) {s};
+    \orbital[pos = {(2,5.5)}]{-s}
+    \node[above] at (2,6) {-s};
+    \orbital[pos = {(4,5.5)}]{lobe}
+    \node[above] at (4.5,6) {simple lobe};
 
     \orbital[pos = {(0,3)}]{px}
     \node[above] at (0,4) {p$_x$};
@@ -398,7 +414,7 @@ Example \ref{expl:all_OA} shows all atomic orbital types available. In order to 
 \label{expl:all_OA}
 \end{example}
 
-\clearpage
+%\clearpage
 \section{Atom and hybrid orbitals}
 
 The package \package provides the command \cmd{satom} in order to quickly draw an atom with several orbital lobes around it. The general syntax of the command is :
@@ -439,7 +455,7 @@ individually on each lobe.
 Example \ref{exple:atom} show several applications of the command \cmd{satom}.
 
 \begin{example}[htbp]
-\begin{minipage}{.78\textwidth}
+\begin{minipage}[c]{.78\textwidth}
 \begin{lstlisting}
 \begin{tikzpicture}
     \satom[color=orange, name=S]{orange/0/east/2/1.}
@@ -467,18 +483,18 @@ Example \ref{exple:atom} show several applications of the command \cmd{satom}.
 \end{tikzpicture} 
 \end{lstlisting}
 \end{minipage}
-\begin{minipage}{.21\textwidth}
+\begin{minipage}[c]{.21\textwidth}
 \begin{tikzpicture}
     \satom[color=orange, name=S]{orange/0/east/2/1.}
     
-    \atom[name=Cl, color=blue, pos={(0,-3)}, scale=1.2]{
+    \atom[name=Cl, color=blue, pos={(0,-2.25)}, scale=1.2]{
         blue/90/north/2,
         blue/0/east/1,
         blue/270/south/2,
         blue/180/west/2} 
-    \atom[name=H, color=gray, pos={(1.8,-3)}, scale=.8]{gray/180/west/1} 
+    \atom[name=H, color=gray, pos={(1.8,-2.25)}, scale=.8]{gray/180/west/1} 
     
-    \satom[name=B, color=green!50!black, pos={(0,-7)}]{
+    \satom[name=B, color=green!50!black, pos={(0,-5.5)}]{
         red/90/north/2/.8,
         blue/0/east/1/0.9,
         orange/270/south/0/1,
@@ -489,7 +505,7 @@ Example \ref{exple:atom} show several applications of the command \cmd{satom}.
 \label{exple:atom}
 \end{example}
 
-\clearpage
+%\clearpage
 \section{More customization}
 
 \subsubsection*{Orbital borders and inner color}

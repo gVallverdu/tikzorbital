@@ -18,6 +18,7 @@
 % ------
 % 27/02/2013 : add -px, -py, -pz orbital type 
 % 05/03/2015 : add satom macro, with scaling options for each lobe
+% 08/04/2015 : add macros to customize orbitals, add -s type orbital
 %
 % -----------------------------------------------------------------------------
 \NeedsTeXFormat{LaTeX2e}
@@ -58,6 +59,10 @@
 %     spinlength : length of spin arrows 
 % -----------------------------------------------------------------------------
 
+% macro \leveWidth allow to set up a default length of levels
+\newcommand{\levelWidth}[1]{\def\@levelWidth{#1}}
+\levelWidth{2}
+
 \pgfkeys{/tikzorbital/drawLevel/.cd,
 % number of electron in the level : up, down, updown or pair
     elec/.store in = \drawLevel@elec,
@@ -67,7 +72,7 @@
     pos/.default = {(0,0)},
 % width of levels
     width/.store in = \drawLevel@width,
-    width/.default = 2,
+    width/.default = \@levelWidth,
 % style of levels
     style/.store in = \drawLevel@style,
     style/.default = {line width = 2pt, color = black!80, line cap = round},
@@ -134,6 +139,14 @@
 \newcommand{\setOrbitalDrawing}[1]{\def\orbitalDrawing{#1}}
 \setOrbitalDrawing{thick}
 
+% color of positive coefficiant
+\newcommand{\setpcolor}[1]{\colorlet{pcolor}{#1}}
+\setpcolor{blue}
+
+% color of negative coefficiant
+\newcommand{\setncolor}[1]{\colorlet{ncolor}{#1}}
+\setncolor{black!30}
+
 % -----------------------------------------------------------------------------
 % inner \@alobe command
 % -----------------------------------------------------------------------------
@@ -176,7 +189,7 @@
 % draw an atomic orbital of a given type.
 %
 %  argument 
-%     type    : lobe, s, px, py, pz, dxz, dyz, dxy, dz2, dx2y2
+%     type    : lobe, s, -s, px, py, pz, -px, -py, -pz, dxz, dyz, dxy, dz2, dx2y2
 %
 %  options
 %     pos     : left position of the level
@@ -195,10 +208,10 @@
     pos/.default = {(0,0)},
 % color of the positive lobe
     pcolor/.store in = \orbital@pcolor,
-    pcolor/.default = blue,
+    pcolor/.default = pcolor,
 % color of the negative lobe
     ncolor/.store in = \orbital@ncolor,
-    ncolor/.default = black!30,
+    ncolor/.default = ncolor,
 % color for s type
     color/.store in = \orbital@color,
     color/.default = empty,
@@ -309,11 +322,15 @@
         \@alobe{\orbital@pos}{90}{\orbital@scale}{\orbital@pcolor}{0}{\orbital@opacity}
     }{
     \ifthenelse{\equal{\orbital@type}{s}}{
-        \node[base, outer color = \orbital@color, scale = \orbital@scale * 1.8] 
+        \node[base, outer color = \orbital@pcolor, scale = \orbital@scale * 1.8] 
             at \orbital@pos {};
     }{
-        \node[red] at \orbital@pos {orbital type unknown};
-    }}}}}}}}}}}}}
+    \ifthenelse{\equal{\orbital@type}{-s}}{
+        \node[base, outer color = \orbital@ncolor, scale = \orbital@scale * 1.8] 
+            at \orbital@pos {};
+    }{
+        \node[red] at \orbital@pos {orbital type unknown};        
+    }}}}}}}}}}}}}}
     \endgroup
 }
 
