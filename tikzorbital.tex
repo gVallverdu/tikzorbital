@@ -567,6 +567,168 @@ no default are given. For example, the $d_{yz}$ atomic orbital is defined as fol
 \@alobe{\orbital@pos}{315}{\orbital@scale}{\orbital@ncolor}{0}{\orbital@opacity} 
 \end{lstlisting}
 
+\section{A concrete example}
+
+Walsh diagram or correlation diagram of molecular orbital between a bent and a linear geometry of an \ce{AH2} molecule. Here, for example the \ce{CH2+} cation.
+
+    % geom lineaire
+    \def\lincoords{
+        \coordinate (O) at (0,0);
+        \coordinate (H1) at (.75, 0);
+        \coordinate (H2) at (-.75, 0);
+        \coordinate (label) at (0, -0.5);
+   
+        \draw (O) -- (H1);
+        \draw (O) -- (H2);
+    }
+
+    % geom coudée
+    \def\coudcoords{
+        \coordinate (O) at (0,0);
+        \coordinate (H1) at ({cos(-40.)}, {sin(-40.)});
+        \coordinate (H2) at ({cos(220)}, {sin(220)});
+        \coordinate (label) at (0, -1.25);
+    
+        \draw (O) -- (H1);
+        \draw (O) -- (H2);
+    }
+
+    \begin{center}
+    \begin{tikzpicture}
+        \levelWidth{1}
+        \setncolor{blue}
+        \setpcolor{orange}
+
+        % lineaire ------------------------------------------------------------
+        \draw[-stealth, thick] (0,0) -- ++ (0, 8) node[right] {E};
+        \node at (-1, 8) {linear};
+        \drawLevel[pos={(-1,0.5)}, elec=pair]{1sg}
+        \node[left] at (left 1sg) {$1\sigma_g\rightarrow 1a_1$};
+        \drawLevel[pos={(-1,1.5)}, elec=pair]{1su}
+        \node[left] at (left 1su) {$1\sigma_u\rightarrow 1b_2$};
+        \drawLevel[pos={(-1,4.05)}, elec=up]{1piu2}
+        \drawLevel[pos={(-1,3.95)}]{1piu1}
+        \node[below left] at (left 1piu1) {$1\pi_u\rightarrow 1a_1$};
+        \node[above left] at (left 1piu2) {$1\pi_u\rightarrow 1b_1$};
+        \drawLevel[pos={(-1,5.5)}]{2sg}
+        \node[left] at (left 2sg) {$2\sigma_g\rightarrow 3a_1$};
+        \drawLevel[pos={(-1,7.5)}]{2su}
+        \node[left] at (left 2su) {$2\sigma_u\rightarrow 2b_2$};
+        
+        % coudée --------------------------------------------------------------    
+        \draw[-stealth, thick] (5,0) -- ++ (0, 8) node[left] {E};
+        \node at (6, 8) {bent};
+        \drawLevel[pos={(5,.25)}, elec=pair]{1a1}
+        \node[right] at (right 1a1) {$1a_1$};
+        \drawLevel[pos={(5,2)}, elec=pair]{1b2}
+        \node[right] at (right 1b2) {$1b_2$};
+        \drawLevel[pos={(5,3)}, elec=up]{2a1}
+        \node[right] at (right 2a1) {$2a_1$};
+        \drawLevel[pos={(5,3.95)}]{b1}
+        \node[right] at (right b1) {$b_1$};
+        \drawLevel[pos={(5,6.25)}]{2b2}
+        \node[right] at (right 2b2) {$2b_2$};
+        \drawLevel[pos={(5,7.25)}]{3a1}
+        \node[right] at (right 3a1) {$3a_1$};
+
+        % corrélations -----------------------------------------------------
+        \draw[black!80] (right 1sg) -- (left 1a1)
+                        (right 1su) -- (left 1b2)
+                        (right 1piu1) -- (left 2a1)
+                        (right 1piu2) -- (left b1)
+                        (right 2sg) -- (left 3a1)
+                        (right 2su) -- (left 2b2);
+                        
+        % OM linéaire ------------------------------------------------------
+        \begin{scope}[xshift=-4cm, yshift=.5cm]
+            \lincoords
+            \orbital[pos={(O)}, scale=1.2]{s}
+            \orbital[pos={(H1)}]{s}
+            \orbital[pos={(H2)}]{s}
+        \end{scope}
+
+        \begin{scope}[xshift=-4cm, yshift=1.5cm]
+            \lincoords
+            \orbital[pos={(O)}, scale=.7]{py}
+            \orbital[pos={(H1)}, scale=.65]{s}
+            \orbital[pos={(H2)}, scale=.65]{-s}
+        \end{scope}
+
+
+        \begin{scope}[xshift=-4cm, yshift=3.5cm]
+            \lincoords
+            \orbital[pos={(O)}, scale=.7]{pz}
+        \end{scope}
+
+        \begin{scope}[xshift=-4cm, yshift=4.5cm]
+            \lincoords
+            \orbital[pos={(O)}, scale=.7]{px}
+        \end{scope}
+
+        \begin{scope}[xshift=-4cm, yshift=5.5cm]
+            \lincoords
+            \orbital[pos={(O)}]{-s}
+            \orbital[pos={(H1)}, scale=1.2]{s}
+            \orbital[pos={(H2)}, scale=1.2]{s}
+        \end{scope}
+
+        \begin{scope}[xshift=-4cm, yshift=7.5cm]
+            \lincoords
+            \orbital[pos={(O)}, scale=.55]{py}
+            \orbital[pos={(H1)}]{-s}
+            \orbital[pos={(H2)}]{s}
+        \end{scope}
+
+        % OM coudée --------------------------------------------------------
+        \begin{scope}[xshift=8cm, yshift=0.5cm, scale=.8]
+            \coudcoords
+            \orbital[pos={(O)}, rotate=90, color=ncolor, scale=.3]{lobe}
+            \orbital[pos={(O)}, rotate=270, color=pcolor]{lobe}
+            \orbital[pos={(H1)}]{s}
+            \orbital[pos={(H2)}]{s}
+        \end{scope}
+        
+        \begin{scope}[xshift=8cm, yshift=2cm, scale=.8]
+            \coudcoords
+            \orbital[pos={(O)}]{py}
+            \orbital[pos={(H1)}]{s}
+            \orbital[pos={(H2)}]{-s}
+        \end{scope}
+
+        \begin{scope}[xshift=8cm, yshift=3cm, scale=.8]
+            \coudcoords
+            \orbital[pos={(O)}, rotate=90, color=ncolor]{lobe}
+            \orbital[pos={(O)}, rotate=270, color=pcolor, scale=.3]{lobe}
+            \orbital[pos={(H1)}, scale=.7]{s}
+            \orbital[pos={(H2)}, scale=.7]{s}
+        \end{scope}
+
+        \begin{scope}[xshift=8cm, yshift=4.1cm, scale=.8]
+            \coudcoords
+            \orbital[pos={(O)}]{px}
+        \end{scope}
+
+        \begin{scope}[xshift=8cm, yshift=6.25cm, scale=.8]
+            \coudcoords
+            \orbital[pos={(O)}]{py}
+            \orbital[pos={(H1)}]{-s}
+            \orbital[pos={(H2)}]{s}
+        \end{scope}
+                
+        \begin{scope}[xshift=8cm, yshift=7.75cm, scale=.8]
+            \coudcoords
+            \orbital[pos={(O)}, rotate=90, color=ncolor, scale=.3]{lobe}
+            \orbital[pos={(O)}, rotate=270, color=pcolor]{lobe}
+            \orbital[pos={(H1)}]{-s}
+            \orbital[pos={(H2)}]{-s}
+        \end{scope}
+        
+        % -----------------------------------------------------------------------
+        \node[above] at (current bounding box.north) {\bfseries The bent geometry is favoured};
+    \end{tikzpicture}
+    \end{center}
+
+\newpage
 \section{Source code}
 
 \lstinputlisting{./tikzorbital.sty}
